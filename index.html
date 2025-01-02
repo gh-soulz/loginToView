@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+        :root {
+            --bg-color: white;
+            --text-color: #111;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #111;
+            --text-color: white;
+        }
+
+        body {
+            margin: 0;
+            font-family: monospace, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 70vh;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 20px 0;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: var(--text-color);
+            color: var(--bg-color);
+            border: 1px solid var(--text-color);
+            border-radius: 5px;
+            font-family: monospace, sans-serif;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        .warning {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .login-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: var(--bg-color);
+        }
+
+        .login-screen input {
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+            width: 80%;
+            max-width: 300px;
+            font-family: monospace, sans-serif;
+        }
+
+        .login-screen button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: var(--text-color);
+            color: var(--bg-color);
+            border: 1px solid var(--text-color);
+            border-radius: 5px;
+        }
+
+        .login-screen button:hover {
+            opacity: 0.8;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="login" class="login-screen">
+        <h1>🔐 login</h1>
+        <input id="username" type="text" placeholder="username" />
+        <input id="password" type="password" placeholder="password" />
+        <button id="loginButton">login</button>
+        <div id="error" class="error"></div>
+    </div>
+
+    <div id="content" class="container" style="display: none;">
+        <h1>https://freestreams-live.my</h1>
+        <iframe id="iframe" src="https://freestreams-live.my" sandbox="allow-same-origin allow-scripts allow-forms"></iframe>
+        <button id="themeToggle">⚙️ toggle theme</button>
+        <div class="warning">⚠️ if you cannot access the page, try using a vpn. for best experience use adblocker.</div>
+    </div>
+
+    <script>
+        const validUsers = [
+            { username: "user", password: "user" },
+            { username: "admin", password: "@Aa29042010!" }
+        ];
+
+        const loginScreen = document.getElementById('login');
+        const contentScreen = document.getElementById('content');
+        const loginButton = document.getElementById('loginButton');
+        const errorDiv = document.getElementById('error');
+        const themeToggle = document.getElementById('themeToggle');
+        const iframe = document.getElementById('iframe');
+
+        const loginTimeout = 60 * 60 * 1000; // 1 hour in milliseconds
+
+        // Check if the user is already logged in
+        const lastLoginTime = localStorage.getItem('lastLoginTime');
+        if (lastLoginTime) {
+            const currentTime = new Date().getTime();
+            if (currentTime - lastLoginTime < loginTimeout) {
+                loginScreen.style.display = 'none';
+                contentScreen.style.display = 'block';
+            }
+        }
+
+        // Login functionality
+        loginButton.addEventListener('click', () => {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const isValidUser = validUsers.some(user => user.username === username && user.password === password);
+
+            if (isValidUser) {
+                // Store the login time
+                localStorage.setItem('lastLoginTime', new Date().getTime());
+
+                loginScreen.style.display = 'none';
+                contentScreen.style.display = 'block';
+            } else {
+                errorDiv.textContent = "⚠️ invalid username or password.";
+            }
+        });
+
+        // Theme toggle functionality
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                document.body.removeAttribute('data-theme');
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+            }
+        });
+
+        // Prevent external navigation from breaking out of the iframe
+        iframe.addEventListener('load', () => {
+            const iframeDocument = iframe.contentWindow.document;
+
+            iframeDocument.addEventListener('click', (event) => {
+                if (event.target.tagName === 'A') {
+                    event.preventDefault();
+                    iframe.src = event.target.href;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
